@@ -27,38 +27,39 @@ module control (
 	input logic			clk, 
 	input logic			reset,
 
-	input logic  [15:0]	ir,
-	input logic			ben,
+	input logic  [15:0]	ir,//@@ instructions register content 
+	input logic			ben,// Branch enable not for week1
 
-	input logic 		continue_i,
+	input logic 		continue_i, 
 	input logic 		run_i,
 
-	output logic		ld_mar,
-	output logic		ld_mdr,
-	output logic		ld_ir,
-	output logic		ld_pc,
-	output logic        ld_led,
+	//control signals
+	output logic		ld_mar, //@@signal to load memory addres register
+	output logic		ld_mdr, //@@signal to load memory data register
+	output logic		ld_ir,  //@@signal to load instruction register
+	output logic		ld_pc,  //@@ update the program counter
+	output logic        ld_led, //@@ used in the pause states
 						
-	output logic		gate_pc,
-	output logic		gate_mdr,
+	output logic		gate_pc, // when high the data bus takes the pc currect value
+	output logic		gate_mdr, //when high puts the data register value on data bus
 						
-	output logic [1:0]	pcmux,
+	output logic [1:0]	pcmux, // @@either incremented pc(state num 00)? or data bus address???, 
 	
 	//You should add additional control signals according to the SLC-3 datapath design
 
 	output logic		mem_mem_ena, // Mem Operation Enable
 	output logic		mem_wr_ena  // Mem Write Enable
 );
-
+// i think gates are choicess for what drives the data bus input  and load will chose which reg saves that drived input at that clock edge 
 	enum logic [4:0] {
-		halted, 
-		pause_ir1,
-		pause_ir2, 
-		s_18, 
-		s_33_1,
-		s_33_2,
-		s_33_3,
-		s_35
+		halted, //halting state
+		pause_ir1, //@@huh
+		pause_ir2, //@@huh
+		s_18,      //@@MAR <- PC
+		s_33_1,	   //@@MDR <- M(MAR) 
+		s_33_2,	// @@this will take multiple clock cycles so that's why it's extended
+		s_33_3, //@@same commment for s_33_2 
+		s_35 // @@IR <-MDR  then  PC <- PC+1 then Go to halt (in the case of week 1) week 2 u decode
 	} state, state_nxt;   // Internal state logic
 
 
@@ -90,32 +91,32 @@ module control (
 	
 		// Assign relevant control signals based on current state
 		case (state)
-			halted: ; 
-			s_18 : 
+			halted: ;  // @@ takes the defult values
+			s_18 : //s_18 = @@MAR <- PC
 				begin 
-					gate_pc = 1'b1;
-					ld_mar = 1'b1;
-					pcmux = 2'b00;
-					ld_pc = 1'b1;
+					gate_pc = 1'b1; //@@ put current PC on BUS
+					ld_mar = 1'b1; //@@ this reg saves the bus val (pc)
+					pcmux = 2'b00; // @@00 state is pc+1
+					ld_pc = 1'b1;  // @@pc saves pc+1
+					//so like if pc was 3 at that time(edge) mar stays 3 and pc gets 4
 				end
 			s_33_1, s_33_2, s_33_3 : //you may have to think about this as well to adapt to ram with wait-states
-				begin
-					mem_mem_ena = 1'b1;
+				begin  // @@ s_33 = MDR <- M(MAR) 
+					mem_mem_ena = 1'b1; //@@Mem Operation Enable, what does thsi tell us?
 					ld_mdr = 1'b1;
 				end
 			s_35 : 
-				begin 
-					gate_mdr = 1'b1;
-					ld_ir = 1'b1;
+				begin // @@ s_35 = IR <-MDR  then the pc already incremented in s_18 for some reason
+					gate_mdr = 1'b1; // @@ put mdr value on the bus
+					ld_ir = 1'b1;    //@obv ir saves that instruction
 				end
-			pause_ir1: ld_led = 1'b1; 
-			pause_ir2: ld_led = 1'b1; 
+			pause_ir1: ld_led = 1'b1; // wait untill u press continue
+			pause_ir2: ld_led = 1'b1; //wait untill u realease continue , from discord  + i dont get this fully 
 			// you need to finish the rest of state output logic..... 
-
+			//@@@@@@@ TO DO 
 			default : ;
 		endcase
 	end 
-
 
 	always_comb
 	begin
@@ -124,10 +125,10 @@ module control (
 
 		unique case (state)
 			halted : 
-				if (run_i) 
+				if (run_i) //@@if run then start fetching
 					state_nxt = s_18;
 			s_18 : 
-				state_nxt = s_33_1; //notice that we usually have 'r' here, but you will need to add extra states instead 
+				state_nxt = s_33_1; //notice that we usually have 'r' here, but you will need to add extra states instead  //@@refers to the original memory ready signal
 			s_33_1 :                 //e.g. s_33_2, etc. how many? as a hint, note that the bram is synchronous, in addition, 
 				state_nxt = s_33_2;   //it has an additional output register. 
 			s_33_2 :
@@ -145,7 +146,7 @@ module control (
 				if (~continue_i)
 					state_nxt = s_18;
 			// you need to finish the rest of state transition logic.....
-			
+			//@@@ why haltedis not used here should we add it
 			default :;
 		endcase
 	end
