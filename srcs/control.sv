@@ -60,7 +60,24 @@ module control (
 		s_33_1,	   //@@MDR <- M(MAR) 
 		s_33_2,	// @@this will take multiple clock cycles so that's why it's extended
 		s_33_3, //@@same commment for s_33_2 
-		s_35 // @@IR <-MDR  then  PC <- PC+1 then Go to halt (in the case of week 1) week 2 u decode
+		s_35, // @@IR <-MDR  then  PC <- PC+1 then Go to halt (in the case of week 1) week 2 u decode
+
+		//@@just added 
+		s_32,
+		s_22, 
+		s_12, 
+		s_4,
+        s_21,
+        s_7,
+        s_23,
+        s_16,
+        s_6,
+        s_25,
+        s_27,
+        s_9,
+        s_5,
+        s_1
+		
 	} state, state_nxt;   // Internal state logic
 
     assign state_out = state;
@@ -240,8 +257,7 @@ module control (
 				state_nxt = s_18;
 			s_5 :
 				state_nxt = s_18;
-			s_1 :
-				state_nxt = s_18;
+			
 
 
 			pause_ir1 : 
