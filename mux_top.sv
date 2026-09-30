@@ -113,7 +113,7 @@ module mux_top;
         .bus_MAR_in(bus_MAR_in),
         .bus_MDR_in(bus_MDR_in),
         .bus_ALU_in(bus_ALU_in),
-        .bus_out(bus_out);
+        .bus_out(bus_out)
     );
 
 endmodule
