@@ -1,5 +1,3 @@
-
-
 module memory (
     input  logic        clk,
     input  logic        reset,

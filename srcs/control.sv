@@ -48,7 +48,8 @@ module control (
 	//You should add additional control signals according to the SLC-3 datapath design
 
 	output logic		mem_mem_ena, // Mem Operation Enable
-	output logic		mem_wr_ena  // Mem Write Enable
+	output logic		mem_wr_ena,  // Mem Write Enable
+	output logic [4:0]  state_out
 );
 // i think gates are choicess for what drives the data bus input  and load will chose which reg saves that drived input at that clock edge 
 	enum logic [4:0] {
@@ -62,7 +63,7 @@ module control (
 		s_35 // @@IR <-MDR  then  PC <- PC+1 then Go to halt (in the case of week 1) week 2 u decode
 	} state, state_nxt;   // Internal state logic
 
-
+    assign state_out = state;
 	always_ff @ (posedge clk)
 	begin
 		if (reset) 
@@ -144,8 +145,8 @@ module control (
 					state_nxt = pause_ir2;
 			pause_ir2 : 
 				if (~continue_i)
-					//state_nxt = s_18;
-					state_nxt = halted;
+					state_nxt = s_18;
+					//state_nxt = halted;
 			// you need to finish the rest of state transition logic.....
 			//@@@ why haltedis not used here should we add it
 			default :;

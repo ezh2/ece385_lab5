@@ -57,6 +57,7 @@ logic [15:0] ir;
 logic [15:0] pc;
 logic [15:0] bus;
 logic ben;
+logic [4:0]  state_out;
 
 assign ben = 1'b0;///@@ i'm doing this so its has a val for week one
 
