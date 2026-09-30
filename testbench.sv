@@ -45,12 +45,12 @@ module testbench(); //even though the testbench doesn't create any hardware, it 
     end
 
     initial begin
-        $monitor("t=%0t PC=%04h IR=%04h MAR=%04h MDR=%04h",
-             $time,
-             pt.slc3.cpu.pc,
-             pt.slc3.cpu.ir,
-             pt.slc3.cpu.mar,
-             pt.slc3.cpu.mdr);
+//        $monitor("t=%0t PC=%04h IR=%04h MAR=%04h MDR=%04h",
+//             $time,
+//             pt.slc3.cpu.pc,
+//             pt.slc3.cpu.ir,
+//             pt.slc3.cpu.mar,
+//             pt.slc3.cpu.mdr);
 
         sw_i = 16'h0000; // Initialize sw_i to 0
         reset = 1'b1;
@@ -65,22 +65,16 @@ module testbench(); //even though the testbench doesn't create any hardware, it 
         run_i = 1'b0; // Initialize runi to 0
         repeat (100) @(posedge clk);
         continue_i = 1'b1;
-        repeat (5) @(posedge clk);
+        repeat (100) @(posedge clk);
         continue_i = 1'b0;
-        repeat (5) @(posedge clk);
+        repeat (100) @(posedge clk);
         continue_i = 1'b1;
-        repeat (5) @(posedge clk);
+        repeat (100) @(posedge clk);
         continue_i = 1'b0;
-        repeat (5) @(posedge clk);
+        repeat (100) @(posedge clk);
         continue_i = 1'b1;
-        
-        $monitor("t=%0t PC=%04h IR=%04h MAR=%04h MDR=%04h",
-             $time,
-             pt.slc3.cpu.pc,
-             pt.slc3.cpu.ir,
-             pt.slc3.cpu.mar,
-             pt.slc3.cpu.mdr);
-        
+
+         $finish();
     end
 
 endmodule
