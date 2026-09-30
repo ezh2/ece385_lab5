@@ -104,7 +104,7 @@ module control (
 			s_33_1, s_33_2, s_33_3 : //you may have to think about this as well to adapt to ram with wait-states
 				begin  // @@ s_33 = MDR <- M(MAR) 
 					mem_mem_ena = 1'b1; //@@Mem Operation Enable, what does thsi tell us?
-					ld_mdr = 1'b1; //@@ Eric: only s_33_3 should load?? 
+					ld_mdr = 1'b1;
 				end
 			s_35 : 
 				begin // @@ s_35 = IR <-MDR  then the pc already incremented in s_18 for some reason
@@ -115,6 +115,63 @@ module control (
 			pause_ir2: ld_led = 1'b1; //wait untill u realease continue , from discord  + i dont get this fully 
 			// you need to finish the rest of state output logic..... 
 			//@@@@@@@ TO DO 
+
+			s_32 :
+				begin
+					
+				end
+			s_22 : // PC <- PC +off9
+				begin
+					
+				end
+			s_12 : // JMP   PC <- BaseR
+				begin
+					
+				end
+			s_4 : // JSR   R7 <- PC
+				begin
+					
+				end
+			s_21 : // PC <- PC+ off11
+				begin
+					
+				end
+			s_7 : // STR MAR<- B+off6
+				begin
+					
+				end
+			s_23 : // MDR <- SR 
+				begin
+					
+				end
+			s_16 : //M[MAR] <- MDR
+				begin
+					
+				end
+			s_6 : //LDR
+				begin
+					
+				end
+			s_25 : //MDR <- M[MAR]
+				begin
+					
+				end
+			s_27 : // DR <- MDR set CC
+				begin
+					
+				end
+			s_9 : // NOT   DR <- NOT(SR) set CC
+				begin
+					
+				end
+			s_5 : // AND   DR <- SR1 & OP2* set CC
+				begin
+					
+				end
+			s_1 : // ADD   DR <- SR1+OP2* set CC
+				begin
+					
+				end
 			default : ;
 		endcase
 	end 
@@ -137,9 +194,56 @@ module control (
 			s_33_3 : 
 				state_nxt = s_35;
 			s_35 : 
-				state_nxt = pause_ir1;
-			// pause_ir1 and pause_ir2 are only for week 1 such that TAs can see 
-			// the values in ir.
+				state_nxt = s_32;
+			s_32 :
+				if (ir[15:12]==4'b0000)
+					state_nxt = //BR
+				else if (ir[15:12]==4'b1100)
+					state_nxt = s_12; //JMP
+				else if (ir[15:12]==4'b0100)
+					state_nxt = s_4; // JSR
+				else if (ir[15:12]==4'b0111)
+					state_nxt = s_7; // STR
+				else if (ir[15:12]==4'b0110)
+					state_nxt = s_6; //LDR
+				else if (ir[15:12]==4'b1001)
+					state_nxt = s_9; //NOT
+				else if (ir[15:12]==4'b0101)
+					state_nxt = s_5; //AND
+				else if (ir[15:12]==4'b0001)
+					state_nxt = s_1; //ADD
+				else if (ir[15:12])
+					state_nxt = halted; //TRAP, but this is not in the provided state diagram, idk if we should have it
+				else
+					state_nxt = s_18; //go back to first state if something is weird
+			s_1 :
+				state_nxt = s_18;
+			s_12 :
+				state_nxt = s_18;
+			s_4 : 
+				state_nxt = s_21;
+			s_21 : 
+				state_nxt = s_18;
+			s_7 :
+				state_nxt = s_23;
+			s_23 :
+				state_nxt = s_16;
+			s_16 :
+				state_nxt = s_18; // there's a R loop, check again @@@@
+			s_6 :
+				state_nxt = s_25;
+			s_25 :
+				state_nxt = s_27; // there's a R loop, check again @@@@
+			s_27 :
+				state_nxt = s_18;
+			s_9 :
+				state_nxt = s_18;
+			s_5 :
+				state_nxt = s_18;
+			s_1 :
+				state_nxt = s_18;
+
+
 			pause_ir1 : 
 				if (continue_i) 
 					state_nxt = pause_ir2;
