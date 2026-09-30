@@ -93,4 +93,27 @@ module mux_top;
         .sr2_out(sr2_out)
     );
 
+    //busmux
+    logic GateMARMUX;
+    logic GatePC;
+    logic GateALU;
+    logic GateMDR;
+    logic [15:0] bus_PC_in;
+    logic [15:0] bus_MAR_in;
+    logic [15:0] bus_ALU_in;
+    logic [15:0] bus_MDR_in;
+    logic [15:0] bus_out;
+
+    busmux u_busmux (
+        .GateMARMUX(GateMARMUX),
+        .GatePC(GatePC),
+        .GateALU(GateALU),
+        .GateMDR(GateMDR),
+        .bus_PC_in(bus_PC_in),
+        .bus_MAR_in(bus_MAR_in),
+        .bus_MDR_in(bus_MDR_in),
+        .bus_ALU_in(bus_ALU_in),
+        .bus_out(bus_out);
+    );
+
 endmodule

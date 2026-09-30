@@ -1,8 +1,8 @@
 module mio_en_mux (
-    input mio_en_in,
-    input rdata,
-    input mio_en_bus,
+    input logic mio_en_in,
+    input logic rdata,
+    input logic mio_en_bus,
 
-    output mio_en_out;
+    output logic mio_en_out;
 );
 endmodule

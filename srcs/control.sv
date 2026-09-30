@@ -53,8 +53,8 @@ module control (
 // i think gates are choicess for what drives the data bus input  and load will chose which reg saves that drived input at that clock edge 
 	enum logic [4:0] {
 		halted, //halting state
-		pause_ir1, //@@huh
-		pause_ir2, //@@huh
+		pause_ir1, //wait untill u press continue
+		pause_ir2, //wait untill u realease continue
 		s_18,      //@@MAR <- PC
 		s_33_1,	   //@@MDR <- M(MAR) 
 		s_33_2,	// @@this will take multiple clock cycles so that's why it's extended
@@ -95,7 +95,7 @@ module control (
 			s_18 : //s_18 = @@MAR <- PC
 				begin 
 					gate_pc = 1'b1; //@@ put current PC on BUS
-					ld_mar = 1'b1; //@@ this reg saves the bus val (pc)
+					ld_mar = 1'b1; //@@ mar <- pc
 					pcmux = 2'b00; // @@00 state is pc+1
 					ld_pc = 1'b1;  // @@pc saves pc+1
 					//so like if pc was 3 at that time(edge) mar stays 3 and pc gets 4
@@ -103,7 +103,7 @@ module control (
 			s_33_1, s_33_2, s_33_3 : //you may have to think about this as well to adapt to ram with wait-states
 				begin  // @@ s_33 = MDR <- M(MAR) 
 					mem_mem_ena = 1'b1; //@@Mem Operation Enable, what does thsi tell us?
-					ld_mdr = 1'b1;
+					ld_mdr = 1'b1; //@@ Eric: only s_33_3 should load?? 
 				end
 			s_35 : 
 				begin // @@ s_35 = IR <-MDR  then the pc already incremented in s_18 for some reason
