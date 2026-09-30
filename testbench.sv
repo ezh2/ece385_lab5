@@ -17,11 +17,11 @@ module testbench(); //even though the testbench doesn't create any hardware, it 
 	logic [7:0]  hex_seg_right;
 	logic [3:0]  hex_grid_right;
 
-    //debug signals from cpu
-    logic [15:0] ir;
-    logic [15:0] pc;
-    logic [15:0] mar;
-    logic [15:0] mdr;
+    //debug signals from cpu @@this is where the ghost signals come from
+    //logic [15:0] ir;
+    //logic [15:0] pc;
+    // logic [15:0] mar;
+    // logic [15:0] mdr;
 
     processor_top pt (
         .clk(clk),
