@@ -144,7 +144,8 @@ module control (
 					state_nxt = pause_ir2;
 			pause_ir2 : 
 				if (~continue_i)
-					state_nxt = s_18;
+					//state_nxt = s_18;
+					state_nxt = halted;
 			// you need to finish the rest of state transition logic.....
 			//@@@ why haltedis not used here should we add it
 			default :;

@@ -16,23 +16,28 @@ module busmux(
     // output logic busmux_REG_FILE,
     // output logic busmux_PCMUX,
 
-    output logic [15:0] bus_out;
+    output logic [15:0] bus_out
 );
+always_comb begin
+    if (GateMARMUX)
+    begin
+        bus_out = bus_MAR_in;
+    end
 
-if (GateMARMUX) begin
-    assign bus_out = bus_MAR_in
-end
+    else if (GatePC) begin
+        bus_out = bus_PC_in;
+    end
 
-else if (GatePC) begin
-    assign bus_out = bus_PC_in
-end
+    else if (GateALU) begin
+        bus_out = bus_ALU_in;
+    end
 
-else if (GateALU) begin
-    assign bus_out = bus_ALU_in
-end
-
-else if (GateMDR) begin
-    assign bus_out = bus_MDR_in
+    else if (GateMDR) begin
+        bus_out = bus_MDR_in;
+    end
+    else begin
+        bus_out = 16'h0000;
+    end
 end
 
 endmodule

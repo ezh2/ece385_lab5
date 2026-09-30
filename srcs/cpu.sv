@@ -20,6 +20,7 @@
 //    Revised 09-25-2024
 //------------------------------------------------------------------------------
 
+// @@commenting
 module cpu (
     input   logic        clk,
     input   logic        reset,
@@ -121,7 +122,7 @@ load_reg #(.DATA_WIDTH(16)) mdr_reg (
 );
 
 
-@@ added
+//@@ added
 pcmux pc_mux (
     .pc_bus_in  (bus),
     .pc_addr_in (16'h0000), // temporary: address calculation is for week two

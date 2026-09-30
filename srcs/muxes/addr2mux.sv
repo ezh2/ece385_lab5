@@ -5,6 +5,6 @@ module addr2mux(
     input logic [15:0] addr2_zero_in,
     input logic [1:0]  addr2_mux_in,
 
-    output logic       addr2_out;
+    output logic       addr2_out
 );
 endmodule

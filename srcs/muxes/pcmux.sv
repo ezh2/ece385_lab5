@@ -4,7 +4,7 @@ module pcmux (
     input logic [15:0] pc_next_in,
     input logic [1:0]  pc_mux_in,
     
-    output logic      pc_mux_out // @@am i tripping or shouldnt this be 16 bit
+    output logic [15:0] pc_mux_out
 );
 
 always_comb begin
