@@ -109,6 +109,9 @@ module control (
 		
 		gate_pc = 1'b0;
 		gate_mdr = 1'b0;
+		gate_mar = 1'b0;
+		gate_alu = 1'b0;
+		
 		 
 		pcmux = 2'b00;
 
@@ -119,7 +122,9 @@ module control (
 		aluk = 2'b00;
 		addr1_mux = 1'b0;
 		addr2_mux = 2'b00;
-
+		sr1_mux = 1'b0;
+		sr2mux = 1'b0;
+		drmux = 1'b0;
 		
 	
 		// Assign relevant control signals based on current state
@@ -171,7 +176,7 @@ module control (
 				begin
 					gate_pc = 1'b1; //@@ put current PC on BUS
 					ld_reg = 1'b1; //@@ load the register with the alu output
-					DRmux = 1'b1; //@@ select R7 as the destination register
+					drmux = 1'b1; //@@ select R7 as the destination register
 				end
 			s_21 : // PC <- PC+ off11
 				begin
@@ -184,16 +189,16 @@ module control (
 				begin
 					addr1_mux = 1'b1;	// @@ select BaseR
 					addr2_mux = 2'b01;	// @@ select SEXT[offset6]
-					SR1mux = 1'b1;  	// @@ select ir[8:6]
+					sr1mux = 1'b1;  	// @@ select ir[8:6]
 					ld_mar = 1'b1;	// @@ load MAR with the ALU output	
-					gate_MARMUX = 1'b1;	// @@ put MAR on the bus
+					gate_mar = 1'b1;	// @@ put MAR on the bus
 				end
 			s_23 : // MDR <- SR 
 				begin
 					aluk = 2'b11;
 					ld_mdr = 1'b1;		// @@load MDR with the data read from memory
-					SR1mux = 1'b0;  	// @@ select ir[11:9] as the first operand for the ALU
-					gate_ALU = 1'b1;	// @@put ALU output on the bus
+					sr1mux = 1'b0;  	// @@ select ir[11:9] as the first operand for the ALU
+					gate_alu = 1'b1;	// @@put ALU output on the bus
 				end
 			s_16_1, s_16_2, s_16_3 : //M[MAR] <- MDR
 				begin
@@ -205,9 +210,9 @@ module control (
 				begin
 					addr1_mux = 1'b1;	// @@ select B
 					addr2_mux = 2'b01;	// @@ select sign extended off6
-					SR1mux = 1'b1;  	// @@ select ir[8:6] as the first operand for the ALU
+					sr1mux = 1'b1;  	// @@ select ir[8:6] as the first operand for the ALU
 					ld_mar = 1'b1;	// @@ load the MAR with the ALU output
-					gate_MARMUX = 1'b1;	// @@ put MAR on the bus
+					gate_mar = 1'b1;	// @@ put MAR on the bus
 				end
 			s_25_1, s_25_2, s_25_3 : //MDR <- M[MAR]
 				begin
@@ -222,31 +227,31 @@ module control (
 			s_9 : // NOT   DR <- NOT(SR) set CC
 				begin
 					aluk = 2'b10;
-					gate_ALU = 1'b1;	// @@put ALU output on the bus
+					gate_alu = 1'b1;	// @@put ALU output on the bus
 					ld_reg = 1'b1;		// @@load the register with the ALU output
-					SR1mux = 1'b1;  	// @@select ir[8:6]
-					DRmux = 1'b0;   	// @@select ir[11:9]
+					sr1mux = 1'b1;  	// @@select ir[8:6]
+					drmux = 1'b0;   	// @@select ir[11:9]
 					ld_cc = 1'b1;		// @@load cc
 				end
 			s_5 : // AND   DR <- SR1 & OP2* set CC
 				begin
 					aluk = 2'b01;
-					gate_ALU = 1'b1;	// @@put ALU output on the bus
+					gate_alu = 1'b1;	// @@put ALU output on the bus
 					ld_reg = 1'b1;		// @@load the register with the ALU output
-					SR1mux = 1'b1;  	// @@select ir[8:6] as the first operand for the ALU
-					SR2mux = ir_5;  	// @@select the second operand for the ALU based on the ir[5] bit
-					DRmux = 1'b0;   	// @@select ir[11:9]
+					sr1mux = 1'b1;  	// @@select ir[8:6] as the first operand for the ALU
+					sr2mux = ir_5;  	// @@select the second operand for the ALU based on the ir[5] bit
+					drmux = 1'b0;   	// @@select ir[11:9]
 					ld_cc = 1'b1;		// @@load cc
 
 				end
 			s_1 : // ADD   DR <- SR1+OP2* set CC
 				begin
 					aluk = 2'b00; //@@ select addition operation for the ALU
-					gate_ALU = 1'b1; //@@ put the alu output on the bus
+					gate_alu = 1'b1; //@@ put the alu output on the bus
 					ld_reg = 1'b1; //@@ load the pc with the alu output
-					SR1mux = 1'b1; //@@ select the pc as the first operand for the alu
-					SR2mux = 1'b1; //@@ select the sign extended off9 as the second operand for the alu
-					DRmux = 1'b0; //@@ slect ir [11:9]
+					sr1mux = 1'b1; //@@ select the pc as the first operand for the alu
+					sr2mux = 1'b1; //@@ select the sign extended off9 as the second operand for the alu
+					drmux = 1'b0; //@@ slect ir [11:9]
 					ld_cc = 1'b1; //@@ set CC
 				end
 			default : ;
