@@ -4,4 +4,19 @@ module sr1mux (
 
     output logic [2:0] sr1_mux_out
 );
+
+always_comb begin
+    if (sr1_mux_in == 1'b0)
+    begin
+        sr1_mux_out = sr1_ir_in[8:6]; //@@ check, im not sure
+    end
+    else if (sr1_mux_in == 1'b1)
+    begin
+        sr1_mux_out = 3'b111; //@@ check, im not sure
+    end
+    else
+    begin
+        sr1_mux_out = 3'b000; // nothing happens; avoid latch
+    end
+end
 endmodule

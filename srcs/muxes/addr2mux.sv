@@ -7,4 +7,26 @@ module addr2mux(
 
     output logic       addr2_out
 );
+    always_comb begin
+        if (addr2_mux_in == 2'b00)
+        begin
+            addr2_out = addr2_sext10_in; //@@ check, im not sure
+        end
+        else if (addr2_mux_in == 2'b01)
+        begin
+            addr2_out = addr2_sext8_in; //@@ check, im not sure
+        end
+        else if (addr2_mux_in == 2'b10)
+        begin
+            addr2_out = addr2_sext5_in; //@@ check, im not sure
+        end
+        else if (addr2_mux_in == 2'b11)
+        begin
+            addr2_out = addr2_zero_in; //@@ check, im not sure
+        end
+        else
+        begin
+            addr2_out = 16'b0; // nothing happens; avoid latch
+        end
+    end
 endmodule

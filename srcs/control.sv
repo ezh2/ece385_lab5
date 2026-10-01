@@ -43,6 +43,15 @@ module control (
 						
 	output logic		gate_pc, // when high the data bus takes the pc currect value
 	output logic		gate_mdr, //when high puts the data register value on data bus
+
+	//eric new added for 5.2
+	output logic		gate_mar, //when high puts the address register value on data bus @@ new added
+	output logic		gate_alu, //when high puts the alu output on data bus @@ new added
+	output logic		addr1_mux, //@@ either pc or base register for alu input 1 @@ new added
+	output logic [1:0]	addr2_mux, //@@ either 0, sign extended off6, sign extended off9 for alu input 2 @@ new added
+	output logic		sr1_mux, //@@ either base register or pc for alu input @@ new added
+	output logic		sr2mux, //@@ either sign extended off5 or second source register for alu input @@ new added
+	output logic		drmux, //@@ either destination register or r7 for alu output to be @@ new added
 						
 	output logic [1:0]	pcmux, // @@either incremented pc(state num 00)? or data bus address???, 
 	
