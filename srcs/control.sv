@@ -49,7 +49,10 @@ module control (
 
 	output logic		mem_mem_ena, // Mem Operation Enable
 	output logic		mem_wr_ena,  // Mem Write Enable
-	output logic [4:0]  state_out
+	output logic [4:0]  state_out,
+
+	output logic ld_cc	//signal that dettermines wether we set the cc or not
+
 );
 // i think gates are choicess for what drives the data bus input  and load will chose which reg saves that drived input at that clock edge 
 	enum logic [4:0] {
@@ -105,6 +108,10 @@ module control (
 		gate_mdr = 1'b0;
 		 
 		pcmux = 2'b00;
+
+		mem_mem_ena = 1'b0;
+		mem_wr_ena  = 1'b0;	
+		ld_cc = 1'b0;
 		
 	
 		// Assign relevant control signals based on current state
@@ -175,23 +182,29 @@ module control (
 				end
 			s_27 : // DR <- MDR set CC
 				begin
-					
+
+				ld_cc = 1'b1;	
 				end
 			s_9 : // NOT   DR <- NOT(SR) set CC
 				begin
-					
+				
+				ld_cc = 1'b1;
 				end
 			s_5 : // AND   DR <- SR1 & OP2* set CC
 				begin
 					
+				ld_cc = 1'b1;
 				end
 			s_1 : // ADD   DR <- SR1+OP2* set CC
 				begin
-					
+
+				ld_cc = 1'b1;	
 				end
 			default : ;
 		endcase
 	end 
+
+
 
 	always_comb
 	begin
