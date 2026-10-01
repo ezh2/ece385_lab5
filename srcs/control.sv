@@ -51,7 +51,8 @@ module control (
 	output logic		mem_wr_ena,  // Mem Write Enable
 	output logic [4:0]  state_out,
 
-	output logic ld_cc	//signal that dettermines wether we set the cc or not
+	output logic ld_cc,	//enable saving cc/nzp
+	output logic [1:0] aluk //chose the operation for ALU
 
 );
 // i think gates are choicess for what drives the data bus input  and load will chose which reg saves that drived input at that clock edge 
@@ -111,7 +112,10 @@ module control (
 
 		mem_mem_ena = 1'b0;
 		mem_wr_ena  = 1'b0;	
+		//@%$$$$$$$$$$$$$$ pls dont forget to give defult val for any new signal u put 
 		ld_cc = 1'b0;
+		aluk = 2'b00;
+
 		
 	
 		// Assign relevant control signals based on current state
@@ -166,7 +170,7 @@ module control (
 				end
 			s_23 : // MDR <- SR 
 				begin
-					
+				aluk = 2'b11;
 				end
 			s_16 : //M[MAR] <- MDR
 				begin
@@ -187,17 +191,17 @@ module control (
 				end
 			s_9 : // NOT   DR <- NOT(SR) set CC
 				begin
-				
+				aluk = 2'b10;
 				ld_cc = 1'b1;
 				end
 			s_5 : // AND   DR <- SR1 & OP2* set CC
 				begin
-					
+				aluk = 2'b01;	
 				ld_cc = 1'b1;
 				end
 			s_1 : // ADD   DR <- SR1+OP2* set CC
 				begin
-
+				aluk = 2'b00;
 				ld_cc = 1'b1;	
 				end
 			default : ;
