@@ -23,6 +23,7 @@
 //	  Fall 2024 Distribution
 //------------------------------------------------------------------------------
 
+//1001 Eric: Not Done Yet
 module control (
 	input logic			clk, 
 	input logic			reset,
@@ -53,6 +54,7 @@ module control (
 
 	output logic ld_cc,	//enable saving cc/nzp
 	output logic [1:0] aluk //chose the operation for ALU
+
 
 );
 // i think gates are choicess for what drives the data bus input  and load will chose which reg saves that drived input at that clock edge 
@@ -144,9 +146,9 @@ module control (
 			// you need to finish the rest of state output logic..... 
 			//@@@@@@@ TO DO 
 
-			s_32 :
+			s_32 : //decode
 				begin
-					
+					ld_ben = 1'b1; //@@ set the ben register to the value of the branch condition
 				end
 			s_22 : // PC <- PC +off9
 				begin
@@ -170,45 +172,66 @@ module control (
 				end
 			s_23 : // MDR <- SR 
 				begin
-				aluk = 2'b11;
+					aluk = 2'b11;
+
 				end
-			s_16 : //M[MAR] <- MDR
+			s_16_1, s_16_2, s_16_3 : //M[MAR] <- MDR
 				begin
-					
+					mem_mem_ena = 1'b1;	// @@ enable memory write
+					mem_wr_ena = 1'b1;	// @@ enable memory write
+					ld_mdr = 1'b1;		// @@load MDR with the data read from memory
 				end
 			s_6 : //LDR
 				begin
-					
+					ADDER1mux = 1'b1;	// @@ select B
+					ADDER2mux = 1'b01;	// @@ select sign extended off6
+					SR1mux = 1'b1;  	// @@ select ir[8:6] as the first operand for the ALU
+					ld_mar = 1'b1;	// @@ load the MAR with the ALU output
+					gate_MARMUX = 1'b1;	// @@ put MAR on the bus
 				end
-			s_25 : //MDR <- M[MAR]
+			s_25_1, s_25_2, s_25_3 : //MDR <- M[MAR]
 				begin
-					
+					mem_mem_ena = 1'b1;	// @@ enable memory write
+					mem_wr_ena = 1'b0;	// @@ disable memory write
+					ld_mdr = 1'b1;		// @@load MDR with the data read from memory
 				end
 			s_27 : // DR <- MDR set CC
 				begin
-
 				ld_cc = 1'b1;	
 				end
 			s_9 : // NOT   DR <- NOT(SR) set CC
 				begin
-				aluk = 2'b10;
-				ld_cc = 1'b1;
+					aluk = 2'b10;
+					gate_ALU = 1'b1;	// @@put ALU output on the bus
+					ld_reg = 1'b1;		// @@load the register with the ALU output
+					SR1mux = 1'b1;  	// @@select ir[8:6]
+					DRmux = 1'b0;   	// @@select ir[11:9]
+					ld_cc = 1'b1;		// @@load cc
 				end
 			s_5 : // AND   DR <- SR1 & OP2* set CC
 				begin
-				aluk = 2'b01;	
-				ld_cc = 1'b1;
+					aluk = 2'b01;
+					gate_ALU = 1'b1;	// @@put ALU output on the bus
+					ld_reg = 1'b1;		// @@load the register with the ALU output
+					SR1mux = 1'b1;  	// @@select ir[8:6] as the first operand for the ALU
+					SR2mux = ir_5;  	// @@select the second operand for the ALU based on the ir[5] bit
+					DRmux = 1'b0;   	// @@select ir[11:9]
+					ld_cc = 1'b1;		// @@load cc
+
 				end
 			s_1 : // ADD   DR <- SR1+OP2* set CC
 				begin
-				aluk = 2'b00;
-				ld_cc = 1'b1;	
+					aluk = 2'b00; //@@ select addition operation for the ALU
+					gate_ALU = 1'b1; //@@ put the alu output on the bus
+					ld_reg = 1'b1; //@@ load the pc with the alu output
+					SR1mux = 1'b1; //@@ select the pc as the first operand for the alu
+					SR2mux = 1'b1; //@@ select the sign extended off9 as the second operand for the alu
+					DRmux = 1'b0; //@@ slect ir [11:9]
+					ld_cc = 1'b1; //@@ set CC
 				end
 			default : ;
 		endcase
 	end 
-
-
 
 	always_comb
 	begin
@@ -261,20 +284,33 @@ module control (
 			s_7 :
 				state_nxt = s_23;
 			s_23 :
-				state_nxt = s_16;
-			s_16 :
-				state_nxt = s_18; // there's a R loop, check again @@@@
+				state_nxt = s_16_1;
+			//state 16 has mult.
+			s_16_1 :
+				state_nxt = s_16_2; // there's a R loop
+			s_16_2 :
+				state_nxt = s_16_3; // there's a R loop
+			s_16_3 :
+				state_nxt = s_18; // there's a R loop
+			//state 16 ends
 			s_6 :
-				state_nxt = s_25;
-			s_25 :
-				state_nxt = s_27; // there's a R loop, check again @@@@
+				state_nxt = s_25_1;
+			//state 25 has multiple states because of the memory read delay, check the comments in the state output logic
+			s_25_1 :
+				state_nxt = s_25_2; // there's a R loop
+			s_25_2 :
+				state_nxt = s_25_3; // there's a R loop
+			s_25_3 :
+				state_nxt = s_27; // there's a R loop
+			//state 25 ends
 			s_27 :
 				state_nxt = s_18;
 			s_9 :
 				state_nxt = s_18;
 			s_5 :
 				state_nxt = s_18;
-			
+			s_1 :
+				state_nxt = s_18;
 
 
 			pause_ir1 : 
