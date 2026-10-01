@@ -43,15 +43,13 @@ module control (
 						
 	output logic		gate_pc, // when high the data bus takes the pc currect value
 	output logic		gate_mdr, //when high puts the data register value on data bus
-
-	//eric new added for 5.2
-	output logic		gate_mar, //when high puts the address register value on data bus @@ new added
-	output logic		gate_alu, //when high puts the alu output on data bus @@ new added
-	output logic		addr1_mux, //@@ either pc or base register for alu input 1 @@ new added
-	output logic [1:0]	addr2_mux, //@@ either 0, sign extended off6, sign extended off9 for alu input 2 @@ new added
-	output logic		sr1_mux, //@@ either base register or pc for alu input @@ new added
-	output logic		sr2mux, //@@ either sign extended off5 or second source register for alu input @@ new added
-	output logic		drmux, //@@ either destination register or r7 for alu output to be @@ new added
+	output logic		gate_mar, //when high puts the address register value on data bus 
+	output logic		gate_alu, //when high puts the alu output on data bus 
+	output logic		addr1_mux, //@@ either pc or base register for alu input 1 
+	output logic [1:0]	addr2_mux, //@@ either 0, sign extended off6, sign extended off9 for alu input 2 
+	output logic		sr1mux, //@@ either base register or pc for alu input 
+	output logic		sr2mux, //@@ either sign extended off5 or second source register for alu input 
+	output logic		drmux, //@@ either destination register or r7 for alu output to be
 						
 	output logic [1:0]	pcmux, // @@either incremented pc(state num 00)? or data bus address???, 
 	
@@ -62,7 +60,9 @@ module control (
 	output logic [4:0]  state_out,
 
 	output logic ld_cc,	//enable saving cc/nzp
-	output logic [1:0] aluk //chose the operation for ALU
+	output logic [1:0] aluk, //chose the operation for ALU
+	output logic ld_reg, // lets the register file load
+	output logic ld_ben  // lets BEN save
 
 
 );
@@ -85,13 +85,18 @@ module control (
         s_21,
         s_7,
         s_23,
-        s_16,
+        s_16_1,
+		s_16_2,
+		s_16_3,
         s_6,
-        s_25,
+        s_25_1,
+		s_25_2,
+		s_25_3,
         s_27,
         s_9,
         s_5,
-        s_1
+        s_1,
+		s_0
 		
 	} state, state_nxt;   // Internal state logic
 
@@ -128,12 +133,16 @@ module control (
 		mem_wr_ena  = 1'b0;	
 		//@%$$$$$$$$$$$$$$ pls dont forget to give defult val for any new signal u put 
 		ld_cc = 1'b0;
+		
 		aluk = 2'b00;
 		addr1_mux = 1'b0;
 		addr2_mux = 2'b00;
-		sr1_mux = 1'b0;
+		sr1mux = 1'b0;
 		sr2mux = 1'b0;
 		drmux = 1'b0;
+
+		ld_reg = 1'b0;
+		ld_ben = 1'b0;
 		
 	
 		// Assign relevant control signals based on current state
@@ -177,7 +186,7 @@ module control (
 				begin
 					pcmux = 2'b10; //@@ select the base register as the new PC value
 					ld_pc = 1'b1; //@@ load the new PC value
-					sr1_mux = 1'b1; //@@ select the base register as the first operand for the ALU
+					sr1mux = 1'b1; //@@ select the base register as the first operand for the ALU
 					addr2_mux = 2'b11; //@@ select 0 as the second operand
 					addr1_mux = 1'b0; //@@ select the base register as the first operand for the ALU
 				end
@@ -231,6 +240,9 @@ module control (
 				end
 			s_27 : // DR <- MDR set CC
 				begin
+				gate_mdr = 1'b1; // put mdr  VAL on the bus
+				ld_reg = 1'b1;   // save BUS into DR
+				drmux = 1'b0;    // destination is ir[11:9]
 				ld_cc = 1'b1;	
 				end
 			s_9 : // NOT   DR <- NOT(SR) set CC
@@ -248,7 +260,7 @@ module control (
 					gate_alu = 1'b1;	// @@put ALU output on the bus
 					ld_reg = 1'b1;		// @@load the register with the ALU output
 					sr1mux = 1'b1;  	// @@select ir[8:6] as the first operand for the ALU
-					sr2mux = ir_5;  	// @@select the second operand for the ALU based on the ir[5] bit
+					sr2mux = ir[5];  	// @@select the second operand for the ALU based on the ir[5] bit
 					drmux = 1'b0;   	// @@select ir[11:9]
 					ld_cc = 1'b1;		// @@load cc
 
@@ -259,7 +271,7 @@ module control (
 					gate_alu = 1'b1; //@@ put the alu output on the bus
 					ld_reg = 1'b1; //@@ load the pc with the alu output
 					sr1mux = 1'b1; //@@ select the pc as the first operand for the alu
-					sr2mux = 1'b1; //@@ select the sign extended off9 as the second operand for the alu
+					sr2mux = ir[5]; //@@ select the sign extended off9 as the second operand for the alu
 					drmux = 1'b0; //@@ slect ir [11:9]
 					ld_cc = 1'b1; //@@ set CC
 				end
@@ -288,7 +300,7 @@ module control (
 				state_nxt = s_32;
 			s_32 :
 				if (ir[15:12]==4'b0000)
-					state_nxt = //BR
+					state_nxt =s_0;
 				else if (ir[15:12]==4'b1100)
 					state_nxt = s_12; //JMP
 				else if (ir[15:12]==4'b0100)
@@ -308,7 +320,7 @@ module control (
 				else
 					state_nxt = s_18; //go back to first state if something is weird
 			s_1 :
-				state_nxt = s_18;
+				state_nxt = s_18; 
 			s_12 :
 				state_nxt = s_18;
 			s_4 : 
@@ -343,7 +355,15 @@ module control (
 				state_nxt = s_18;
 			s_5 :
 				state_nxt = s_18;
-			s_1 :
+			
+			//@@@@@@@@@@@@@@@@@ new added needs cheaking
+			s_0 : // right upper  side of state diagram
+				if (ben)
+					state_nxt = s_22;
+				else
+					state_nxt = s_18;
+
+			s_22 :
 				state_nxt = s_18;
 
 
@@ -353,9 +373,7 @@ module control (
 			pause_ir2 : 
 				if (~continue_i)
 					state_nxt = s_18;
-					//state_nxt = halted;
-			// you need to finish the rest of state transition logic.....
-			//@@@ why haltedis not used here should we add it
+					
 			default :;
 		endcase
 	end
