@@ -117,6 +117,8 @@ module control (
 		//@%$$$$$$$$$$$$$$ pls dont forget to give defult val for any new signal u put 
 		ld_cc = 1'b0;
 		aluk = 2'b00;
+		addr1_mux = 1'b0;
+		addr2_mux = 2'b00;
 
 		
 	
@@ -152,28 +154,46 @@ module control (
 				end
 			s_22 : // PC <- PC +off9
 				begin
-					
+					pcmux = 2'b10; //@@ select the base register as the new PC value
+					ld_pc = 1'b1; //@@ load the new PC value
+					addr1_mux = 1'b0; //@@ select the base register as the first operand for the ALU
+					addr2_mux = 2'b10; //@@ select the sign extended off9 as the second operand for the ALU
 				end
 			s_12 : // JMP   PC <- BaseR
 				begin
-					
+					pcmux = 2'b10; //@@ select the base register as the new PC value
+					ld_pc = 1'b1; //@@ load the new PC value
+					sr1_mux = 1'b1; //@@ select the base register as the first operand for the ALU
+					addr2_mux = 2'b11; //@@ select 0 as the second operand
+					addr1_mux = 1'b0; //@@ select the base register as the first operand for the ALU
 				end
 			s_4 : // JSR   R7 <- PC
 				begin
-					
+					gate_pc = 1'b1; //@@ put current PC on BUS
+					ld_reg = 1'b1; //@@ load the register with the alu output
+					DRmux = 1'b1; //@@ select R7 as the destination register
 				end
 			s_21 : // PC <- PC+ off11
 				begin
-					
+					pcmux = 2'b10; //@@ select the base register as the new PC value
+					ld_pc = 1'b1; //@@ load the new PC value
+					addr1_mux = 1'b0; //@@ select the base register as the first operand for the ALU
+					addr2_mux = 2'b11; //@@ select 0 as the second operand for the ALU
 				end
 			s_7 : // STR MAR<- B+off6
 				begin
-					
+					addr1_mux = 1'b1;	// @@ select BaseR
+					addr2_mux = 2'b01;	// @@ select SEXT[offset6]
+					SR1mux = 1'b1;  	// @@ select ir[8:6]
+					ld_mar = 1'b1;	// @@ load MAR with the ALU output	
+					gate_MARMUX = 1'b1;	// @@ put MAR on the bus
 				end
 			s_23 : // MDR <- SR 
 				begin
 					aluk = 2'b11;
-
+					ld_mdr = 1'b1;		// @@load MDR with the data read from memory
+					SR1mux = 1'b0;  	// @@ select ir[11:9] as the first operand for the ALU
+					gate_ALU = 1'b1;	// @@put ALU output on the bus
 				end
 			s_16_1, s_16_2, s_16_3 : //M[MAR] <- MDR
 				begin
@@ -183,8 +203,8 @@ module control (
 				end
 			s_6 : //LDR
 				begin
-					ADDER1mux = 1'b1;	// @@ select B
-					ADDER2mux = 1'b01;	// @@ select sign extended off6
+					addr1_mux = 1'b1;	// @@ select B
+					addr2_mux = 2'b01;	// @@ select sign extended off6
 					SR1mux = 1'b1;  	// @@ select ir[8:6] as the first operand for the ALU
 					ld_mar = 1'b1;	// @@ load the MAR with the ALU output
 					gate_MARMUX = 1'b1;	// @@ put MAR on the bus
