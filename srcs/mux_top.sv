@@ -69,7 +69,7 @@ module mux_top (
     mio_en_mux u_mio_en_mux (
         .mio_en_bus(mio_en_bus),
         .rdata(rdata),
-        .mio_en_sel(mio_en_bus_sel),
+        .mio_en_sel(mio_en_sel),
         .mio_en_out(mio_en_out)
     );
 
