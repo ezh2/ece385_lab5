@@ -1,2 +1,0 @@
-cpu_to_io.sv and instantiate_ram.sv no need to modify
-De-bouncer and synchronization modules from previous labs no need to modify
