@@ -14,9 +14,9 @@ module mux_top (
     input  logic        dr_mux_in,
     output logic [2:0]  dr_mux_out,
 
-    input  logic [15:0] mio_en_in,
+    input  logic [15:0] mio_en_bus,
     input  logic [15:0] rdata,
-    input  logic        mio_en_bus,
+    input  logic        mio_en_sel,
     output logic [15:0] mio_en_out,
 
     input  logic [15:0] pc_bus_in,
