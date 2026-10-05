@@ -232,7 +232,7 @@ module control (
 				end
 			s_6 : //LDR
 				begin
-					addr1_mux = 1'b1;	// @@ select @@ idk about this one
+					addr1_mux = 1'b0;	// @@ select
 					addr2_mux = 2'b10;	// @@ select sext off6
 					sr1mux = 1'b1;  	// @@ select ir[8:6] as the first operand for the ALU
 					ld_mar = 1'b1;	// @@ load the MAR with the ALU output
