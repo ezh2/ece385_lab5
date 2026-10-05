@@ -6,3 +6,5 @@ references:
 
 the current version includes 5.2 content.
 download working 5.1 version from releases
+remove testbenches when submitting
+changes needed for fsm muxes (there are confusions, have to check them)
