@@ -1,24 +1,25 @@
 module mio_en_mux (
-    input logic mio_en_in,
-    input logic rdata,
-    input logic mio_en_bus,
+    
+    input logic [15:0] mio_en_bus,
+    input logic [15:0] rdata,
+    input logic mio_en_sel,
 
-    output logic mio_en_out
+    output logic [15:0] mio_en_out
 );
 
     always_comb 
     begin
-        if (mio_en_bus == 1'b0)
+        if (mio_en_sel == 1'b0)
         begin
-            mio_en_out = mio_en_in; //@@ check, im not sure
+            mio_en_out = mio_en_bus; //@@ check, im not sure
         end
-        else if (mio_en_bus == 1'b1)
+        else if (mio_en_sel == 1'b1)
         begin
             mio_en_out = rdata; //@@ check, im not sure
         end
-        else
-        begin
-            mio_en_out = 1'b0; // nothing happens; avoid latch
-        end
+        // else
+        // begin
+        //     mio_en_out = 16'b0; // nothing happens; avoid latch
+        // end
     end
 endmodule

@@ -1,3 +1,5 @@
+
+// 6:40 
 //------------------------------------------------------------------------------
 // Company:          UIUC ECE Dept.
 // Engineer:         Stephen Kempf
@@ -22,7 +24,7 @@
 //	  Revised 9-27-2024
 //	  Fall 2024 Distribution
 //------------------------------------------------------------------------------
-
+// this is diff
 //1001 Eric: Not Done Yet
 module control (
 	input logic			clk, 
@@ -50,7 +52,8 @@ module control (
 	output logic		sr1mux, //@@ either base register or pc for alu input 
 	output logic		sr2mux, //@@ either sign extended off5 or second source register for alu input 
 	output logic		drmux, //@@ either destination register or r7 for alu output to be
-						
+
+	//pc 00 = pc+1, pc 01= the bus, pc 10 address from address adder 11 =0	 this 11 shouldnt be reached
 	output logic [1:0]	pcmux, // @@either incremented pc(state num 00)? or data bus address???, 
 	
 	//You should add additional control signals according to the SLC-3 datapath design
@@ -127,7 +130,7 @@ module control (
 		gate_alu = 1'b0;
 		
 		 
-		pcmux = 2'b00;
+		pcmux = 2'b00;// deffault and means pc+1
 
 		mem_mem_ena = 1'b0;
 		mem_wr_ena  = 1'b0;	
@@ -152,7 +155,7 @@ module control (
 				begin 
 					gate_pc = 1'b1; //@@ put current PC on BUS
 					ld_mar = 1'b1; //@@ mar <- pc
-					pcmux = 2'b00; // @@00 state is pc+1
+					pcmux = 2'b00; // @@10 state is pc+1
 					ld_pc = 1'b1;  // @@pc saves pc+1
 					//so like if pc was 3 at that time(edge) mar stays 3 and pc gets 4
 				end
@@ -173,18 +176,21 @@ module control (
 
 			s_32 : //decode
 				begin
+					//benis  calculated and saved in cpu
 					ld_ben = 1'b1; //@@ set the ben register to the value of the branch condition
 				end
 			s_22 : // PC <- PC +off9
 				begin
-					pcmux = 2'b10; //@@ select the base register as the new PC value
+					
+					//pc 00 = pc+1, pc 01= the bus, pc 10 address from address adder 11 =0
+					pcmux = 2'b10; //@@ select the address from address adderthe new PC value
 					ld_pc = 1'b1; //@@ load the new PC value
-					addr1_mux = 1'b0; //@@ select the base register as the first operand for the ALU
-					addr2_mux = 2'b10; //@@ select the sign extended off9 as the second operand for the ALU
+					addr1_mux = 1'b1; //@@ select the PC as the first operand for the ALU
+					addr2_mux = 2'b01; //@@ select the sign extended off9 as the second operand for the ALU
 				end
 			s_12 : // JMP   PC <- BaseR
 				begin
-					pcmux = 2'b10; //@@ select the base register as the new PC value
+					pcmux = 2'b10; //@@ select address from address adder as the new PC value
 					ld_pc = 1'b1; //@@ load the new PC value
 					sr1mux = 1'b1; //@@ select the base register as the first operand for the ALU
 					addr2_mux = 2'b11; //@@ select 0 as the second operand
@@ -198,15 +204,15 @@ module control (
 				end
 			s_21 : // PC <- PC+ off11
 				begin
-					pcmux = 2'b10; //@@ select the base register as the new PC value
+					pcmux = 2'b10; //@@ select the address from address adder as the new PC value
 					ld_pc = 1'b1; //@@ load the new PC value
-					addr1_mux = 1'b0; //@@ select the base register as the first operand for the ALU
-					addr2_mux = 2'b11; //@@ select 0 as the second operand for the ALU
+					addr1_mux = 1'b1; //@@ select PC as the first operand for the ALU
+					addr2_mux = 2'b00; //@@ select 11 as the second operand for the ALU
 				end
 			s_7 : // STR MAR<- B+off6
 				begin
-					addr1_mux = 1'b1;	// @@ select BaseR
-					addr2_mux = 2'b01;	// @@ select SEXT[offset6]
+					addr1_mux = 1'b0;	// @@ select BaseR
+					addr2_mux = 2'b10;	// @@ select SEXT[offset6]
 					sr1mux = 1'b1;  	// @@ select ir[8:6]
 					ld_mar = 1'b1;	// @@ load MAR with the ALU output	
 					gate_mar = 1'b1;	// @@ put MAR on the bus
@@ -222,12 +228,12 @@ module control (
 				begin
 					mem_mem_ena = 1'b1;	// @@ enable memory write
 					mem_wr_ena = 1'b1;	// @@ enable memory write
-					ld_mdr = 1'b1;		// @@load MDR with the data read from memory
+					
 				end
 			s_6 : //LDR
 				begin
-					addr1_mux = 1'b1;	// @@ select B
-					addr2_mux = 2'b01;	// @@ select sign extended off6
+					addr1_mux = 1'b1;	// @@ select @@ idk about this one
+					addr2_mux = 2'b10;	// @@ select sext off6
 					sr1mux = 1'b1;  	// @@ select ir[8:6] as the first operand for the ALU
 					ld_mar = 1'b1;	// @@ load the MAR with the ALU output
 					gate_mar = 1'b1;	// @@ put MAR on the bus
@@ -260,7 +266,7 @@ module control (
 					gate_alu = 1'b1;	// @@put ALU output on the bus
 					ld_reg = 1'b1;		// @@load the register with the ALU output
 					sr1mux = 1'b1;  	// @@select ir[8:6] as the first operand for the ALU
-					sr2mux = ir[5];  	// @@select the second operand for the ALU based on the ir[5] bit
+					sr2mux = ir[5];  	// @@select the second operand for the ALU based on the ir[5] bit @@ there may be an issue here (DEBUG CHECK)
 					drmux = 1'b0;   	// @@select ir[11:9]
 					ld_cc = 1'b1;		// @@load cc
 
@@ -271,7 +277,7 @@ module control (
 					gate_alu = 1'b1; //@@ put the alu output on the bus
 					ld_reg = 1'b1; //@@ load the pc with the alu output
 					sr1mux = 1'b1; //@@ select the pc as the first operand for the alu
-					sr2mux = ir[5]; //@@ select the sign extended off9 as the second operand for the alu
+					sr2mux = ir[5]; //@@ select the sign extended off9 as the second operand for the alu @@ there may be an issue here (DEBUG CHECK)
 					drmux = 1'b0; //@@ slect ir [11:9]
 					ld_cc = 1'b1; //@@ set CC
 				end
@@ -315,10 +321,10 @@ module control (
 					state_nxt = s_5; //AND
 				else if (ir[15:12]==4'b0001)
 					state_nxt = s_1; //ADD
-				else if (ir[15:12])
-					state_nxt = halted; //TRAP, but this is not in the provided state diagram, idk if we should have it
-				else
-					state_nxt = s_18; //go back to first state if something is weird
+				else if (ir[15:12]==4'b1101)
+					state_nxt = pause_ir1; //pause
+				else//shouldnt be reached but wtv
+					state_nxt = s_18; //go back to fetch if something is weird
 			s_1 :
 				state_nxt = s_18; 
 			s_12 :
@@ -356,7 +362,6 @@ module control (
 			s_5 :
 				state_nxt = s_18;
 			
-			//@@@@@@@@@@@@@@@@@ new added needs cheaking
 			s_0 : // right upper  side of state diagram
 				if (ben)
 					state_nxt = s_22;
@@ -365,15 +370,13 @@ module control (
 
 			s_22 :
 				state_nxt = s_18;
-
-
 			pause_ir1 : 
 				if (continue_i) 
 					state_nxt = pause_ir2;
 			pause_ir2 : 
 				if (~continue_i)
 					state_nxt = s_18;
-					
+
 			default :;
 		endcase
 	end

@@ -9,11 +9,11 @@ module sr2mux(
 always_comb begin
     if (sr2_ctrl_in == 1'b0)
     begin
-        sr2_out = sr2_sext_in; //@@ check, im not sure
+        sr2_out = sr2_in;
     end
     else if (sr2_ctrl_in == 1'b1)
     begin
-        sr2_out = sr2_in; //@@ check, im not sure
+        sr2_out = sr2_sext_in;
     end
     else
     begin

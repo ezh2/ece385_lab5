@@ -8,8 +8,8 @@ module reg_file (
     input  logic [2:0]  sr1,    //chose which register to read first
     input  logic [2:0]  sr2,    //chose ...... seconed
 
-    output logic [15:0] sr1_out, //value from that register delected by sr1
-    output logic [15:0] sr2_out  //vlaue from ...... sr2
+    output logic [15:0] sr1_data, // from registers[sr1]
+    output logic [15:0] sr2_data  // from registers[sr2]
 );
 
  logic [15:0] registers [8]; // i decided to use the behavioral way since it seemed easier
@@ -22,7 +22,7 @@ always_ff @(posedge clk)
 
 always_comb
     begin
-    sr1_out = registers[sr1]; // assign output reg
-    sr2_out = registers[sr2];
+    sr1_data = registers[sr1];
+    sr2_data = registers[sr2];
     end
 endmodule

@@ -79,11 +79,6 @@ package SLC3_TYPES;
    } ben_t;
 
 // MUXES
-
-
-
-
-
  
    parameter outHEX = -1;
    parameter inSW = -1;
